@@ -1,0 +1,15 @@
+F429ZI Pins
+LD1 PB_0
+LD2 PB_7
+LD3 PB_14
+Button PC_13
+
+F767ZI Pins
+LD1 PB_0
+LD2 PB_7
+LD3 PB_14
+Button PC_13
+
+F306K8 Pins
+LD1 PB_3
+
