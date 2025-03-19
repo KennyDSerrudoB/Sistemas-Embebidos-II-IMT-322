@@ -21,7 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <string.h>
+#include <stdbool.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -40,16 +41,27 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-
+uint8_t number0=123;
+uint16_t number1=1234;
+uint32_t number2 = 12345;
+int number3 =-123456;
+float number4 = -123456.789f;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
-
+char* utoa(uint32_t value, char* buffer);
+void printUtoa(uint32_t value);
+char* itoa(int value, char* buffer);
+void printInt(int value);
+void ftoa(float value, char* buffer, int precision);
+void printFloat(float value, int precision);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -86,6 +98,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -94,6 +107,18 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  printUtoa(number0);
+	  HAL_UART_Transmit(&huart2, (uint8_t*)"\t", 1, HAL_MAX_DELAY);
+	  printUtoa(number1);
+	  HAL_UART_Transmit(&huart2, (uint8_t*)"\t", 1, HAL_MAX_DELAY);
+	  printUtoa(number2);
+	  HAL_UART_Transmit(&huart2, (uint8_t*)"\t", 1, HAL_MAX_DELAY);
+	  printInt(number3);
+	  HAL_UART_Transmit(&huart2, (uint8_t*)"\t", 1, HAL_MAX_DELAY);
+	  printFloat(number4, 3);
+	  HAL_UART_Transmit(&huart2, (uint8_t*)"\n", 1, HAL_MAX_DELAY);
+
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -138,6 +163,41 @@ void SystemClock_Config(void)
 }
 
 /**
+  * @brief USART2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART2_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART2_Init 0 */
+
+  /* USER CODE END USART2_Init 0 */
+
+  /* USER CODE BEGIN USART2_Init 1 */
+
+  /* USER CODE END USART2_Init 1 */
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 115200;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart2.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  huart2.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART2_Init 2 */
+
+  /* USER CODE END USART2_Init 2 */
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -152,14 +212,27 @@ static void MX_GPIO_Init(void)
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 
-  /*Configure GPIO pins : VCP_TX_Pin VCP_RX_Pin */
-  GPIO_InitStruct.Pin = VCP_TX_Pin|VCP_RX_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, LD1_Pin|LD2_Pin|UBUTTON_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : LD3_Pin */
+  GPIO_InitStruct.Pin = LD3_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  GPIO_InitStruct.Alternate = GPIO_AF7_USART2;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LD3_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : LD1_Pin LD2_Pin UBUTTON_Pin */
+  GPIO_InitStruct.Pin = LD1_Pin|LD2_Pin|UBUTTON_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
@@ -167,7 +240,96 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+char* utoa(uint32_t value, char* buffer) {
+    char* ptr = buffer;
+    char* ptr1 = buffer;
+    char tmp_char;
+    uint32_t tmp_value;
+    do {
+        tmp_value = value;
+        value /= 10;
+        *ptr++ = '0' + (tmp_value - (value * 10));
+    } while (value != 0);
 
+    *ptr-- = '\0';
+    while (ptr1 < ptr) {
+        tmp_char = *ptr;
+        *ptr-- = *ptr1;
+        *ptr1++ = tmp_char;
+    }
+
+    return buffer;
+}
+void printUtoa(uint32_t value) {
+	static char buffer[12];
+    utoa(value, buffer);
+    HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), HAL_MAX_DELAY);
+}
+char* itoa(int value, char* buffer) {
+    char* ptr = buffer;
+    char* ptr1 = buffer;
+    char tmp_char;
+    int tmp_value;
+    bool isNegative = false;
+
+    if (value < 0) {
+        isNegative = true;
+        value = -value;
+    }
+
+    // Conversión a decimal fijo (base 10)
+    do {
+        tmp_value = value;
+        value /= 10;
+        *ptr++ = '0' + (tmp_value - (value * 10));
+    } while (value != 0);
+
+    if (isNegative) {
+        *ptr++ = '-';
+    }
+
+    *ptr-- = '\0';
+
+    while (ptr1 < ptr) {
+        tmp_char = *ptr;
+        *ptr-- = *ptr1;
+        *ptr1++ = tmp_char;
+    }
+
+    return buffer;
+}
+void printInt(int value) {
+
+	static char buffer[22];  // Suficiente para -2147483648 + '\0'
+	itoa(value, buffer);     // Convertir número a decimal con signo
+	HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), HAL_MAX_DELAY);
+}
+
+void ftoa(float value, char* buffer, int precision) {
+    int int_part = (int)value;
+    float decimal = value - (float)int_part;
+    if (decimal < 0) decimal = -decimal;
+    char* ptr = buffer;
+
+    ptr = itoa(int_part, ptr);
+    while (*ptr) ptr++;
+
+    *ptr++ = '.';
+
+    for (int i = 0; i < precision; i++) {
+        decimal *= 10.0f;
+        int digit = (int)decimal;
+        *ptr++ = '0' + digit;
+        decimal -= digit;
+    }
+    *ptr = '\0';
+
+}
+void printFloat(float value, int precision) {
+    static char buffer[32];
+    ftoa(value, buffer, precision);
+    HAL_UART_Transmit(&huart2, (uint8_t*)buffer, strlen(buffer), HAL_MAX_DELAY);
+}
 /* USER CODE END 4 */
 
 /**
