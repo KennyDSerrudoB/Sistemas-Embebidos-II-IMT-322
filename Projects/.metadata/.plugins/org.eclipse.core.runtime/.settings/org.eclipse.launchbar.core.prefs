@@ -15,5 +15,7 @@ org.eclipse.launchbar.core.descriptorType.default\:digitalOutputsF303K8\ Debug/a
 org.eclipse.launchbar.core.descriptorType.default\:digitalOutputsF303K8\ Debug/activeLaunchTarget=org.eclipse.launchbar.core.launchTargetType.local\:Local
 org.eclipse.launchbar.core.descriptorType.default\:prooveBlinkSimple\ Debug/activeLaunchMode=run
 org.eclipse.launchbar.core.descriptorType.default\:prooveBlinkSimple\ Debug/activeLaunchTarget=org.eclipse.launchbar.core.launchTargetType.local\:Local
+org.eclipse.launchbar.core.descriptorType.default\:uartContPjtctF303K8\ Debug/activeLaunchMode=run
+org.eclipse.launchbar.core.descriptorType.default\:uartContPjtctF303K8\ Debug/activeLaunchTarget=org.eclipse.launchbar.core.launchTargetType.local\:Local
 org.eclipse.launchbar.core.descriptorType.default\:uartF303K8\ Debug/activeLaunchMode=run
 org.eclipse.launchbar.core.descriptorType.default\:uartF303K8\ Debug/activeLaunchTarget=org.eclipse.launchbar.core.launchTargetType.local\:Local
